@@ -8,18 +8,21 @@ import (
 	"github.com/rifki321/warungku/app"
 )
 
-func ReadJwt(r *http.Request, w http.ResponseWriter) (string, error) {
-	jwtString := r.Header.Get("Authorization")
+func ReadJwt(r *http.Request) (string, error) {
+	jwtCookie := r.Header.Get("Cookie")
+	jwtSplit := strings.Split(jwtCookie, "=")
+	jwtString := jwtSplit[1]
 	if jwtString == "" {
-		Response(w, http.StatusUnauthorized, "UNAUTHORIZED", nil)
+		return "", nil
 	}
 	token, err := app.VerifyToken(strings.TrimPrefix(jwtString, "Bearer "))
 	if err != nil {
-		Response(w, http.StatusUnauthorized, "UNAUTHORIZATION", nil)
+		return "", err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		Response(w, http.StatusUnauthorized, "UNAUTHORIZATION", nil)
+		return "", err
+
 	}
 	username := claims["username"].(string)
 	return username, nil

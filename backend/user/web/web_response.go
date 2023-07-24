@@ -12,5 +12,11 @@ type ResponseLogin struct {
 type ResponseRegister struct {
 	Username  string    `json:"username"`
 	Message   string    `json:"message"`
+	ImageUrl  string    `json:"image_url"`
+	CreatedAt time.Time `json:"created_at"`
+}
+type ResponseMe struct {
+	Username  string    `json:"username"`
+	ImageUrl  string    `json:"image_url"`
 	CreatedAt time.Time `json:"created_at"`
 }

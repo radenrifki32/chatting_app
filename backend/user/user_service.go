@@ -17,6 +17,7 @@ import (
 type UserService interface {
 	Register(ctx context.Context, request web.RegisterRequest) (web.ResponseRegister, error)
 	Login(ctx context.Context, request web.LoginRequest, w http.ResponseWriter) (web.ResponseLogin, error)
+	GetUserByUsername(ctx context.Context, username string) (web.ResponseMe, error)
 }
 
 type UserServiceImpl struct {
@@ -33,8 +34,16 @@ func NewUserService(repo UserRepo, sql *sql.DB) UserService {
 }
 func (serviceUser UserServiceImpl) Register(ctx context.Context, request web.RegisterRequest) (web.ResponseRegister, error) {
 	tx, err := serviceUser.sql.Begin()
+	sql := serviceUser.sql
 	if err != nil {
 		return web.ResponseRegister{}, err
+	}
+	userIsReady, err := serviceUser.repo.GetUserByUsername(ctx, sql, request.Username)
+	if err != nil {
+		return web.ResponseRegister{}, err
+	}
+	if userIsReady.Username == request.Username {
+		return web.ResponseRegister{}, errors.New("Username Sudah Terdaftar")
 	}
 	defer helper.CommitOrRollback(tx)
 	if len(request.Password) < 8 {
@@ -104,7 +113,21 @@ func (userService UserServiceImpl) Login(ctx context.Context, request web.LoginR
 		Username:  user.Username,
 		Token:     token,
 		CreatedAt: user.CreatedAt,
+		Message:   "Login Success",
 	}
 
 	return response, nil
+}
+
+func (UserService UserServiceImpl) GetUserByUsername(ctx context.Context, username string) (web.ResponseMe, error) {
+	sql := UserService.sql
+	users, err := UserService.repo.GetUserByUsername(ctx, sql, username)
+	if err != nil {
+		return web.ResponseMe{}, nil
+	}
+	responseUser := web.ResponseMe{
+		Username: users.Username,
+		ImageUrl: users.ImageUrl,
+	}
+	return responseUser, nil
 }

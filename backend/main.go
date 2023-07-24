@@ -16,6 +16,7 @@ import (
 	"github.com/rifki321/warungku/messages/servicemessage"
 	"github.com/rifki321/warungku/middleware"
 	"github.com/rifki321/warungku/product"
+	"github.com/rifki321/warungku/upload"
 	"github.com/rifki321/warungku/user"
 	"github.com/rifki321/warungku/user/web"
 )
@@ -24,7 +25,6 @@ func main() {
 	db := app.GetConnectionDb()
 	NewRepo := user.NewUserRepoRepository()
 	NewService := user.NewUserService(NewRepo, db)
-	NewController := user.NewUserController(NewService)
 	NewRepoProduct := product.NewProductRepo()
 	NewServiceProduct := product.NewProductService(NewRepoProduct, db)
 	NewControllerProduct := product.NewProductController(NewServiceProduct)
@@ -37,6 +37,9 @@ func main() {
 	NewRepoMessage := repositorymessage.NewMessageRepository()
 	NewServiceMessage := servicemessage.NewServiceMessage(db, NewRepoMessage)
 	NewControllerMessage := controllermessage.NewControllerMessage(NewServiceMessage)
+	NewServiceUplaod := upload.NewMedia()
+	NewControllerUpload := upload.NewContrrolerUplaod(NewServiceUplaod)
+	NewController := user.NewUserController(NewService)
 
 	router := httprouter.New()
 	handler := middleware.CorsMiddleware(router)
@@ -54,6 +57,8 @@ func main() {
 	router.POST("/message", NewControllerMessage.SendMessage)
 	router.GET("/allmessage", NewControllerMessage.GetMessageByUsername)
 	router.GET("/message/:messageId", NewControllerMessage.GetMessageByIdMessage)
+	router.POST("/upload", NewControllerUpload.FileUpload)
+	router.GET("/user/me", NewController.GetUserByUsername)
 
 	router.PanicHandler = web.PanicHandler
 

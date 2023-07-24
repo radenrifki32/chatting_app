@@ -2,7 +2,6 @@ package app
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,7 +12,6 @@ func GetConnectionDb() *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("connnected")
 	db.SetConnMaxLifetime(10 * time.Hour)
 	db.SetConnMaxIdleTime(10 * time.Hour)
 	db.SetMaxIdleConns(10)

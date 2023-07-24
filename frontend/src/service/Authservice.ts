@@ -2,11 +2,11 @@ import axios,{AxiosError, AxiosResponse} from "axios";
 
 import { Auth } from "../types/Auth";
 import apiClient from "../axios/axiosClient";
-import { RegisterResponse,LoginResponse } from "../types/ResponseType/Auth";
+import { RegisterResponse,LoginResponse, DataMe, Me } from "../types/ResponseType/Auth";
 
 
 interface CustomAxiosError extends AxiosError<any, any> {
-  response?: AxiosResponse<RegisterResponse | LoginResponse| AxiosError<unknown, any>, any>;
+  response?: AxiosResponse<AxiosError<unknown, any>, any>;
 }
 const Register = async ({ username, password }: Auth): Promise<RegisterResponse> => {
   try {
@@ -17,9 +17,11 @@ const Register = async ({ username, password }: Auth): Promise<RegisterResponse>
     return response.data;
   } catch (error: unknown) {
     const axiosError = error as CustomAxiosError;
-    if (axiosError.response) {
-      const responseData = axiosError.response.data as RegisterResponse;
-      throw new Error(responseData.data.message);
+    if (axiosError?.response) {
+      console.log(error)
+      const responseData = axiosError?.response;
+      console.log(responseData)
+      return Promise.reject(responseData?.data?.message)
     } else {
       throw error;
     }
@@ -33,21 +35,38 @@ const Register = async ({ username, password }: Auth): Promise<RegisterResponse>
         username: username,
         password: password
       });
+      console.log(response.data)
       return response.data;
     } catch (error: unknown) {
       const axiosError = error as CustomAxiosError;
       if (axiosError.response) {
-        const responseData = axiosError.response.data as LoginResponse;
-        throw new Error(responseData.data.message);
+        console.log(axiosError)
+        const responseData = axiosError.response;
+        return Promise.reject(responseData.data.message)
       } else {
-        throw error;
+        throw new Error()
       }
     } finally {
     }
   };
+export const UserMe = async () :Promise<Me | undefined>=>{
+  try {
+    const response : AxiosResponse<Me>  =  await apiClient.get('/user/me')
+    return response.data
+
+  } catch (error :  unknown) {
+     const axiosError = error as CustomAxiosError
+     if(axiosError?.response){
+      const responseData = axiosError?.response
+      throw new Error(responseData?.data?.message)
+     }
+  }
+}  
+
 const authSerive =  {
     Register,
-    Login
+    Login,
+    UserMe
 }
 
 export default authSerive

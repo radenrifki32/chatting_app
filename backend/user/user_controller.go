@@ -16,6 +16,7 @@ type ErrorResponse struct {
 type UserController interface {
 	Register(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 	Login(w http.ResponseWriter, r *http.Request, params httprouter.Params)
+	GetUserByUsername(w http.ResponseWriter, r *http.Request, params httprouter.Params)
 }
 
 type UserControllerImpl struct {
@@ -65,14 +66,17 @@ func (controller *UserControllerImpl) Login(w http.ResponseWriter, r *http.Reque
 
 	helper.Response(w, http.StatusOK, "Success", userResponse)
 }
-
-func WriteFromJsonBody(w http.ResponseWriter, response interface{}) {
-	w.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	err := encoder.Encode(response)
-
+func (controller *UserControllerImpl) GetUserByUsername(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	username, err := helper.ReadJwt(r)
 	if err != nil {
-		panic(err)
+		helper.Response(w, http.StatusUnauthorized, "UNAUTHORIZED", nil)
 
 	}
+	response, err := controller.service.GetUserByUsername(r.Context(), username)
+	if err != nil {
+		helper.Response(w, http.StatusInternalServerError, "INTERNAL SERVER ERROR", nil)
+		return
+	}
+	helper.Response(w, http.StatusOK, "OK", response)
+
 }

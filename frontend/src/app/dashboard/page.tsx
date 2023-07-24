@@ -4,6 +4,7 @@ import ServiceProduct from '../../service/productService'
 import { Product, sendMessage } from '../../types/product'
 import Input from '../../components/InputType/Input'
 import Button from '../../components/button/Button'
+import authSerive from '@/service/Authservice'
 interface Data {
   message : string 
   subject_message : string 
@@ -12,8 +13,15 @@ interface Data {
   
 }
 
+interface Me {
+  username : string
+  image_url : string
+}
 
-const dashboard = () => {
+
+
+const Dashboard = () => {
+  const [me,setMe] = useState<Me[]>([])
 
   const [data, setDatas] = useState<Product[]>([]);
   const [postMessage,setPostMessage] = useState<sendMessage> ({
@@ -22,6 +30,14 @@ const dashboard = () => {
     send_to : ""
 
   })
+
+const getMe = async()=>{
+  try {
+     const response = await authSerive.UserMe
+  } catch (error) {
+    
+  }
+}
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,4 +89,4 @@ const dashboard = () => {
 
 }
 
-export default dashboard
+export default Dashboard

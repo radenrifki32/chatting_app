@@ -6,6 +6,10 @@ export interface DataRegister {
   message: string;
   created_at: string;
 }
+export interface DataMe {
+  username : string
+  iamge_url : string
+}
 
 export interface DataLogin {
   username : string 
@@ -23,5 +27,11 @@ export interface LoginResponse {
   code: HttpStatusCode ;
   status: boolean;
   data : DataLogin
+}
+export interface Me {
+  code: HttpStatusCode ;
+  status: boolean;
+data : DataMe
+
 }
    
